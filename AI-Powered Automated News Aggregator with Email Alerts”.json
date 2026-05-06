@@ -1,0 +1,297 @@
+{
+  "name": "AI-Powered Automated News Aggregator with Email Alerts”",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        -16
+      ],
+      "id": "0020f956-fe59-42ac-ad53-1c41b86b553c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://www.techradar.com/feeds/tag/ai",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -496,
+        -128
+      ],
+      "id": "18b54bb9-700d-403f-8f36-dc867d815f23",
+      "name": "TechReder RSS"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst threeDaysAgo = new Date();\nthreeDaysAgo.setDate(now.getDate() - 3);\n\nconst recentItems = [];\n\nfor (const item of items) {\n    const dateValue = item.json.pubDate || item.json.date || item.json.publishedAt;\n\n    if (!dateValue) continue;\n\n    const pubDate = new Date(dateValue);\n\n    if (pubDate >= threeDaysAgo) {\n        recentItems.push(item);\n    }\n}\n\n// fallback if empty\nif (recentItems.length === 0) {\n    return items.slice(0, 1);\n}\n\nreturn recentItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "d2bb8005-178b-4783-b1c2-f14d3c7c7246",
+      "name": "FILTER"
+    },
+    {
+      "parameters": {
+        "sendTo": "chakravardhanramannagari06@gmail.com",
+        "subject": "News",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        80
+      ],
+      "id": "d4d72b61-8fc8-4eee-a3f3-850291a58b74",
+      "name": "Send a message",
+      "webhookId": "32e1f324-15f3-4e35-a2ea-b37c23373efc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ltcCfETyuQafygrc",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.kdnuggets.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        208
+      ],
+      "id": "afc76283-e1bc-42cc-9935-209f340979a0",
+      "name": "TechReder RSS1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst threeDaysAgo = new Date();\nthreeDaysAgo.setDate(now.getDate() - 3);\n\nconst recentItems = [];\n\nfor (const item of items) {\n    const dateValue = item.json.pubDate || item.json.date || item.json.publishedAt;\n\n    if (!dateValue) continue;\n\n    const pubDate = new Date(dateValue);\n\n    if (pubDate >= threeDaysAgo) {\n        recentItems.push(item);\n    }\n}\n\n// fallback if empty\nif (recentItems.length === 0) {\n    return items.slice(0, 1);\n}\n\nreturn recentItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        208
+      ],
+      "id": "e7e3a040-982f-4d12-98fd-e7a038655964",
+      "name": "KD nuggets Filter"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        64,
+        80
+      ],
+      "id": "0aa12a3e-2813-497e-b27e-a46026199a08",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior AI research analyst.\n\nYour task is to analyze and summarize the following tech news into high-value insights.\n\nInstructions:\n- Extract ONLY the most important information\n- Identify trends, breakthroughs, and business impact\n- Merge similar news into combined insights\n- Prioritize relevance over quantity\n\nOutput Rules (STRICT):\n- Generate 10 to 20 bullet points (based on input size)\n- Each bullet must:\n  - Be 1–2 lines max\n  - Start with a strong keyword (e.g., \"AI Breakthrough:\", \"Market Shift:\", \"Startup Activity:\", \"Regulation:\")\n  - Contain clear, actionable insight\n- Avoid repetition\n- Avoid generic summaries\n- No fluff\n\nTone:\n- Professional\n- Analytical\n- Insight-driven\n\nNews Data:\n{{ $json.message }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        816,
+        80
+      ],
+      "id": "cea7cfae-b581-4ef3-a1a3-cf66dca68f97",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        304
+      ],
+      "id": "2149e3f1-16e3-4226-8c3a-d8f2cf9133bf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gCF61N66Jzwt95Bm",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let output = `\n<h2>🤖 Daily AI</h2>\n<hr>\n`;\n\nitems.forEach((item, index) => {\n    const title = item.json.title || \"No title\";\n    const url = item.json.link || item.json.url || \"No URL\";\n    const date = item.json.pubDate || item.json.date || item.json.publishedAt || \"\";\n\n    let formattedDate = \"\";\n    if (date) {\n        const d = new Date(date);\n        formattedDate = d.toLocaleDateString();\n    }\n\n    output += `\n    <p>\n        <b>${index + 1}. ${title}</b> ${formattedDate ? `(${formattedDate})` : \"\"}<br>\n        <a href=\"${url}\">${url}</a>\n    </p>\n    `;\n});\n\nreturn [\n    {\n        json: {\n            message: output\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        80
+      ],
+      "id": "1211f0c1-7116-47f7-b11b-c8212162d795",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst threeDaysAgo = new Date();\nthreeDaysAgo.setDate(now.getDate() - 3);\n\n// Step 1: Filter last 3 days\nlet recentItems = items.filter(item => {\n    const dateValue = item.json.pubDate || item.json.date || item.json.publishedAt;\n    if (!dateValue) return false;\n\n    const pubDate = new Date(dateValue);\n    return pubDate >= threeDaysAgo;\n});\n\n// Step 2: Sort by latest date (descending)\nrecentItems.sort((a, b) => {\n    const dateA = new Date(a.json.pubDate || a.json.date || a.json.publishedAt);\n    const dateB = new Date(b.json.pubDate || b.json.date || b.json.publishedAt);\n    return dateB - dateA; // newest first\n});\n\n// Step 3: Take top 5\nrecentItems = recentItems.slice(0, 20);\n\n// Step 4: Fallback if empty\nif (recentItems.length === 0) {\n    return items.slice(0, 1);\n}\n\nreturn recentItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        80
+      ],
+      "id": "dd25927c-e50a-4f1d-b176-3c76bc5a82a0",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "TechReder RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechReder RSS1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechReder RSS": {
+      "main": [
+        [
+          {
+            "node": "FILTER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechReder RSS1": {
+      "main": [
+        [
+          {
+            "node": "KD nuggets Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KD nuggets Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9fcee9c1-58a9-4ea6-88ae-a6be73f6d2da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ddfb348b94403011a403b7684a9edc7d78285394df3cb944254609f971c18a2e"
+  },
+  "id": "xgspfF4iQJLDJ4bb",
+  "tags": []
+}
