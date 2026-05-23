@@ -1,4 +1,4 @@
-# AI-Powered Automated News Aggregator with Email Alerts
+# AI-Powered Automated News Aggregator with Email Alert
 
 ## Overview
 
